@@ -148,7 +148,7 @@ def write_next_chapter(book_title: str) -> Optional[str]:
     formatted_chapter = edited_chapter
     
     # Save the chapter
-    chapter_short_title = chapter['chapter_title'][:20].replace(' ', '_').lower()
+    chapter_short_title = chapter['chapter_title'][:20].replace(' ', '_').replace(':', '').replace('/', '').replace('\\', '').lower()
     chapter_filename = book_metadata.chapters_dir / f"ch{chapter['chapter_number']:02d}_{chapter_short_title}.md"
     with open(chapter_filename, "w", encoding="utf-8") as f:
         f.write(f"# Chapter {chapter['chapter_number']}: {chapter['chapter_title']}\n\n")

@@ -363,7 +363,7 @@ def store_book_metadata_to_mongodb(book_title: str) -> bool:
     try:
         # Get the collection
         collection = _get_mongodb_collection()
-        if not collection:
+        if collection is None:
             logger.error("Cannot connect to MongoDB")
             return False
         
@@ -422,7 +422,7 @@ def load_book_metadata_from_mongodb(book_title: str) -> str:
     try:
         # Get the collection
         collection = _get_mongodb_collection()
-        if not collection:
+        if collection is None:
             logger.error("Cannot connect to MongoDB")
             return None
         
@@ -462,7 +462,7 @@ def sync_all_books_to_mongodb() -> str:
     try:
         # Get the collection
         collection = _get_mongodb_collection()
-        if not collection:
+        if collection is None:
             logger.error("Cannot connect to MongoDB")
             return results
         
@@ -505,7 +505,7 @@ def get_all_books_from_mongodb() -> str:
     try:
         # Get the collection
         collection = _get_mongodb_collection()
-        if not collection:
+        if collection is None:
             logger.error("Cannot connect to MongoDB")
             return "[]"
         
