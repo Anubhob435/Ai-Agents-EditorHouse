@@ -1,0 +1,17 @@
+[project]
+name = "ai-book-adk"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-adk[database]>=1.6.1",
+    "google-genai>=1.25.0",
+    "litellm>=1.74.3",
+    "mcp>=1.11.0",
+    "pillow>=11.3.0",
+    "psutil>=7.0.0",
+    "pymongo>=4.13.2",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.4",
+]
