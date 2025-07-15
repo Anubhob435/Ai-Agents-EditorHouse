@@ -39,17 +39,34 @@ def book_pipeline(topic: str, num_chapters: int = 5) -> str:
     
     # Plan the book
     logger.info("Planning book structure...")
-    book_plan = book_planner_agent(topic, num_chapters)
-    logger.info(f"Book Title: {book_plan['book_title']}")
-    logger.info(f"Book Plan: {len(book_plan['chapters'])} chapters planned")
+    book_plan_json = book_planner_agent(topic, num_chapters)
+    
+    try:
+        # Parse the JSON string returned by book_planner_agent
+        book_plan = json.loads(book_plan_json) if isinstance(book_plan_json, str) else book_plan_json
+        logger.info(f"Book Title: {book_plan['book_title']}")
+        logger.info(f"Book Plan: {len(book_plan['chapters'])} chapters planned")
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        logger.error(f"Error parsing book plan: {e}")
+        logger.error(f"Book plan content: {book_plan_json}")
+        # Create a fallback book plan
+        book_plan = {
+            "book_title": f"Book about {topic}",
+            "book_description": f"A comprehensive guide to {topic}",
+            "chapters": [{"chapter_number": i, "chapter_title": f"Chapter {i}", 
+                         "synopsis": f"Exploring {topic}", 
+                         "key_points": [f"Understanding {topic}"]} 
+                        for i in range(1, num_chapters + 1)]
+        }
+        logger.info(f"Using fallback book plan: {book_plan['book_title']}")
     
     # Generate cover description
     logger.info("Generating cover description...")
-    cover_description = book_cover_description_agent(book_plan)
+    cover_description = book_cover_description_agent(json.dumps(book_plan))
     
     # Generate table of contents
     logger.info("Creating table of contents...")
-    toc = table_of_contents_generator(book_plan)
+    toc = table_of_contents_generator(json.dumps(book_plan))
     
     # Initialize metadata manager and create initial metadata
     book_metadata = BookMetadata("books", book_plan["book_title"])
@@ -88,10 +105,20 @@ def write_next_chapter(book_title: str) -> Optional[str]:
         return
     
     chapter = metadata["chapters"][chapter_index]
-    book_plan = metadata["generation_info"]["book_plan"]
+    book_plan_data = metadata["generation_info"]["book_plan"]
+    
+    # Ensure book_plan_data is a dictionary (parse if it's a JSON string)
+    if isinstance(book_plan_data, str):
+        try:
+            book_plan = json.loads(book_plan_data)
+        except json.JSONDecodeError:
+            logger.error("Failed to parse book plan from metadata")
+            return
+    else:
+        book_plan = book_plan_data
     
     logger.info(f"Writing chapter {chapter['chapter_number']}: {chapter['chapter_title']}...")
-    raw_chapter = chapter_writer_agent(book_plan, chapter_index)
+    raw_chapter = chapter_writer_agent(json.dumps(book_plan), chapter_index)
     
     logger.info(f"Editing chapter {chapter['chapter_number']}...")
     edited_chapter = chapter_editor_agent(raw_chapter, chapter['chapter_title'])

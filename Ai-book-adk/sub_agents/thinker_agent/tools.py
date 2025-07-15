@@ -65,20 +65,32 @@ def book_planner_agent(topic: str, num_chapters: int = 5) -> str:
             model="gemini-2.0-flash",
             contents=prompt
         )
+        
+        # Check if response is valid
+        if not response or not response.text:
+            raise ValueError("Empty response from model")
+            
+        # Try to parse the JSON
         book_plan = json.loads(response.text)
         return json.dumps(book_plan)  # Return as JSON string
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing JSON from model response: {e}")
+        logger.error(f"Raw response: {getattr(response, 'text', 'No response')}")
     except Exception as e:
         logger.error(f"Error in creating book plan: {e}")
-        # Fallback to a simpler format if JSON parsing fails
-        fallback_plan = {
-            "book_title": f"Book about {topic}",
-            "book_description": f"A collection of stories about {topic}",
-            "chapters": [{"chapter_number": i, "chapter_title": f"Chapter {i}", 
-                         "synopsis": f"A story about {topic}", 
-                         "key_points": [f"Explore {topic}"]} 
-                        for i in range(1, num_chapters + 1)]
-        }
-        return json.dumps(fallback_plan)
+        
+    # Fallback to a simpler format if any error occurs
+    logger.info("Using fallback book plan due to errors")
+    fallback_plan = {
+        "book_title": f"Book about {topic}",
+        "book_description": f"A comprehensive guide to {topic}",
+        "chapters": [{"chapter_number": i, "chapter_title": f"Chapter {i}: Understanding {topic}", 
+                     "synopsis": f"This chapter explores various aspects of {topic}", 
+                     "key_points": [f"Explore {topic}", f"Learn about {topic}", f"Apply {topic} concepts"]} 
+                    for i in range(1, num_chapters + 1)]
+    }
+    return json.dumps(fallback_plan)
 
 
 

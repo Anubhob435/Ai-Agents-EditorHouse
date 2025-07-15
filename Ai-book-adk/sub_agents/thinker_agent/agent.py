@@ -2,7 +2,9 @@ from datetime import datetime
 
 from google.adk.agents import Agent
 from google.adk.tools.tool_context import ToolContext
+from google.adk.tools.agent_tool import AgentTool
 from . import tools
+#from ...agent import root_agent               
 
 # Create the thinker agent
 thinker_agent = Agent(
@@ -19,7 +21,9 @@ thinker_agent = Agent(
     
     Always ensure your plans are well-structured, engaging, and appropriate for the target audience.
     """,
+    #sub_agents=[root_agent],
     tools=[
+        #AgentTool(agent = root_agent),
         tools.book_planner_agent,
         tools.table_of_contents_generator,
         tools.book_cover_description_agent,
