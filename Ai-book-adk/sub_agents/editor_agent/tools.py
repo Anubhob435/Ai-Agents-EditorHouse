@@ -68,8 +68,10 @@ def chapter_editor_agent(chapter_content: str, chapter_title: str) -> str:
         The edited chapter with improved quality while preserving the original voice
     """
     prompt = f"""
-    Please edit the following chapter titled "{chapter_title}" for grammar, clarity, flow, and narrative coherence.
+    Edit the following chapter titled "{chapter_title}" for grammar, clarity, flow, and narrative coherence.
     Preserve the creative style and voice while improving the overall quality.
+    
+    IMPORTANT: Return ONLY the edited chapter content. Do not include any explanatory text, rationale, or meta-commentary about the edits made. Just return the clean, edited chapter text.
     
     Chapter content:
     {chapter_content}
