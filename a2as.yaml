@@ -1,0 +1,732 @@
+manifest:
+  version: "0.1.3"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: anubhob435/ai-agents-editorhouse
+    source: https://github.com/anubhob435/ai-agents-editorhouse
+    branch: master
+    commit: "61d59be1"
+    scope: [Ai-book-adk/sub_agents/editor_agent/agent.py, others/editor.py, Ai-book-adk/agent.py, Ai-book-adk/sub_agents/publisher_agent/__init__.py,
+      Ai-book-adk/sub_agents/writer_agent/__init__.py, Ai-book-adk/sub_agents/illustrator_agent/__init__.py, Ai-book-adk/sub_agents/editor_agent/tools.py,
+      others/illustrator.py, Ai-book-adk/sub_agents/writer_agent/tools.py, Ai-book-adk/sub_agents/illustrator_agent/sub_agents/image_description_writer_agent/__init__.py,
+      Ai-book-adk/tools.py, Ai-book-adk/sub_agents/thinker_agent/__init__.py, Ai-book-adk/sub_agents/writer_agent/agent.py,
+      Ai-book-adk/sub_agents/thinker_agent/agent.py, Ai-book-adk/sub_agents/research_agent/agent.py, Ai-book-adk/sub_agents/house_manager_agent/tools.py,
+      Ai-book-adk/sub_agents/illustrator_agent/agent.py, Ai-book-adk/sub_agents/publisher_agent/agent.py, Ai-book-adk/sub_agents/illustrator_agent/sub_agents/image_description_writer_agent/agent.py,
+      Ai-book-adk/sub_agents/research_agent/__init__.py, Ai-book-adk/sub_agents/editor_agent/__init__.py, Ai-book-adk/sub_agents/house_manager_agent/agent.py,
+      others/main.py, Ai-book-adk/sub_agents/publisher_agent/tools.py, Ai-book-adk/sub_agents/house_manager_agent/__init__.py,
+      Ai-book-adk/sub_agents/thinker_agent/tools.py, Ai-book-adk/__init__.py, others/regenerate_chapters.py]
+  issued:
+    by: A2AS.org
+    at: '2026-02-11T16:41:37Z'
+    url: https://a2as.org/certified/agents/anubhob435/ai-agents-editorhouse
+  signatures:
+    digest: sha256:Jrba0S7JzqYSFGEnImaTgkm2qyJ0wcHFuox4ZGw3BIQ
+    key: ed25519:Yx90i9gBCk_Qw0khVYKgd57Vd-sI7edLJd8K6faLOvU
+    sig: ed25519:6DIv99sBRQ6X_DKdIgvderALPIIRCEG7DnGAMTPYILID-CMWg5ALL9AOlbvWviJJzeUL5T-3ELVIHHiybjLRDA
+
+agents:
+  ai_book_adk:
+    type: instance
+    models: [gemini-2.5-flash]
+    tools: [book_pipeline, write_next_chapter, editor_agent, house_manager_agent, illustrator_agent, publisher_agent, thinker_agent,
+      writer_agent]
+    params:
+      name: Ai_Book_Writer_and_Editor
+      description: You are an editor House agent that helps users with book generation, formatting, and compilation.
+      instruction: [You are the main orchestrator for an AI-powered book creation system., You coordinate a team of specialized
+          sub-agents to help users create complete books from concept to publication., 'Your capabilities include:', '- Planning
+          and structuring books with the thinker agent', '- Writing content with the writer agent', '- Editing and refining
+          content with the editor agent', '- Creating illustrations with the illustrator agent', '- Compiling and publishing
+          final books with the publisher agent', 'You can handle the complete book creation workflow:', 1. Use book_pipeline()
+          to plan a book structure, 2. Use write_next_chapter() to write chapters sequentially, 3. Coordinate sub-agents for
+          specialized tasks, Always guide users through the book creation process step by step., 'After every chapter of a
+          book generated, before proceeding to the next chapter, call the Thinker agent', to ensure that book meta data was
+          uploaded to mongoDb database., 'If users have questions about Editor House, services, or need general guidance,',
+        delegate to the House Manager agent who can provide comprehensive information.]
+      sub_agents: [editor_agent, house_manager_agent, illustrator_agent, publisher_agent, thinker_agent, writer_agent]
+  editor_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [editor_agent, publish_story, chapter_editor_agent]
+    params:
+      name: editor_agent
+      description: Editor agent for editing chapters of a book and improving content quality
+      instruction: [You are a professional editor specialized in improving written content quality., 'Your expertise includes:',
+        '- Grammar and style editing', '- Improving clarity and flow', '- Maintaining the author''s voice and creative style',
+        '- Ensuring narrative coherence and consistency', Always preserve the original creative intent while enhancing readability
+          and quality., 'Focus on improving grammar, clarity, and flow without changing the core content or style.']
+  house_manager_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [get_house_services, get_house_agents_info, get_book_creation_workflow, answer_house_faq, get_house_status]
+    params:
+      name: house_manager_agent
+      description: House Manager for Editor House - provides information about services, agents, and guides users
+      instruction: ['You are the House Manager for Editor House, an AI-powered book creation platform.', Your role is to be
+          the friendly and knowledgeable guide for users who want to understand our services., 'Your responsibilities include:',
+        '- Providing comprehensive information about Editor House services and capabilities', '- Explaining the book creation
+          workflow and process', '- Introducing users to our specialized agents and their roles', '- Answering frequently
+          asked questions about our platform', '- Guiding new users on how to get started', '- Providing status updates and
+          operational information', 'Your personality should be:', '- Professional yet approachable', '- Knowledgeable about
+          all aspects of Editor House', '- Helpful and patient with user questions', '- Enthusiastic about our book creation
+          services', '- Clear and detailed in explanations', 'Always use your tools to provide accurate, up-to-date information
+          about Editor House.', 'When users ask about specific services or processes, provide detailed explanations.', 'If
+          users seem new to the platform, offer to guide them through the getting started process.']
+  illustrator_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [generate_illustration, image_description_weiter_agent]
+    params:
+      name: illustrator_agent
+      description: Illustrator agent for creating illustrations for chapters of a book
+      instruction: ['Generate an illustration based on the provided description, if sufficient description', is not found
+          use the image description writer agent to generate a description., 'Args:', 'description: A text description of
+          what to generate', 'prefix: A prefix for the filename (default: ''illustration'')', 'book_path: Path to the book
+          folder where illustrations should be saved', 'Returns:', The file path of the saved illustration]
+  image_description_weiter_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [google_search]
+    params:
+      name: image_description_weiter_agent
+      description: Agent that can werite image descriptions for illustrations
+      instruction: [You are an agent that can write image descriptions for illustrations from a single line or word., If needed
+          you can search the web for more information.]
+  publisher_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [compile_book, get_book_status]
+    params:
+      name: publisher_agent
+      description: Publisher agent for compiling and publishing books
+      instruction: [You are a professional publishing agent responsible for the final compilation and output of books., 'Your
+          expertise includes:', '- Compiling individual chapters into complete books', '- Managing book metadata and tracking',
+        '- Generating final formatted output', '- Creating book status reports', '- Handling file management and organization',
+        'Always ensure the final output is well-formatted, complete, and properly organized.']
+  research_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    params:
+      name: research_agent
+      description: research agent for researching topics, gathering information, and providing insights
+      instruction: ['You are a research agent specialized in gathering information, analyzing topics, and providing insights.']
+  thinker_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [book_planner_agent, table_of_contents_generator, book_cover_description_agent, store_book_metadata_to_mongodb,
+      load_book_metadata_from_mongodb, sync_all_books_to_mongodb, get_all_books_from_mongodb]
+    params:
+      name: thinker_agent
+      description: Thinking agent for planning out the outline of a book, name of chapters, and content of chapters
+      instruction: [You are a strategic book planning agent responsible for creating comprehensive book outlines and managing
+          book metadata., 'Your expertise includes:', '- Creating detailed book plans with compelling chapter structures',
+        '- Generating table of contents', '- Designing book cover concepts', '- Managing book metadata and tracking progress',
+        'Always ensure your plans are well-structured, engaging, and appropriate for the target audience.']
+  writer_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [headline_agent, writer_agent, chapter_writer_agent, story_pipeline]
+    params:
+      name: writer_agent
+      description: Writer agent that helps users with book generation, content creation, and storytelling.
+      instruction: [You are a creative writing agent specialized in generating compelling content for books and stories.,
+        'Your expertise includes:', '- Writing engaging chapter content based on book plans', '- Creating short stories from
+          topics', '- Generating creative titles and headlines', '- Developing characters, dialogue, and narrative structure',
+        'Always write content that is engaging, well-structured, and appropriate for the target audience.', 'Use vivid descriptions,
+          compelling dialogue, and strong narrative flow.']
+
+models:
+  gemini-2.0-flash:
+    type: literal
+    agents: [editor_agent, writer_agent, thinker_agent, research_agent, illustrator_agent, publisher_agent, image_description_weiter_agent,
+      house_manager_agent]
+  gemini-2.5-flash:
+    type: literal
+    agents: [ai_book_adk]
+
+tools:
+  answer_house_faq:
+    type: function
+    agents: [house_manager_agent]
+    params:
+      module: tools.answer_house_faq
+      description: "Answers frequently asked questions about Editor House services.\n\nArgs:\n    question: The question to\
+        \ answer\n    \nReturns:\n    str: Answer to the question or list of FAQs"
+  book_cover_description_agent:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.book_cover_description_agent
+      description: "Generates a detailed description for a book cover design.\n\nArgs:\n    book_plan: JSON string containing\
+        \ the book plan with title and description\n    \nReturns:\n    A detailed description for book cover design with\
+        \ visual direction"
+  book_pipeline:
+    type: function
+    agents: [ai_book_adk]
+    params:
+      module: tools.book_pipeline
+      description: "Complete pipeline to create and publish a book from topic to structure.\n\nArgs:\n    topic: The main\
+        \ topic or theme for the book\n    num_chapters: Number of chapters to plan (default: 5)\n    \nReturns:\n    The\
+        \ book title for reference in subsequent operations"
+  book_planner_agent:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.book_planner_agent
+      description: "Creates a detailed book outline with chapters based on the topic.\n\nArgs:\n    topic: The main topic\
+        \ or theme for the book\n    num_chapters: Number of chapters to plan (default: 5)\n    \nReturns:\n    A JSON string\
+        \ containing the book plan with title, description, and chapter details"
+  chapter_editor_agent:
+    type: function
+    agents: [editor_agent]
+    params:
+      module: tools.chapter_editor_agent
+      description: "Edit a chapter for grammar, style, and narrative coherence.\n\nArgs:\n    chapter_content: The raw chapter\
+        \ content to edit\n    chapter_title: The title of the chapter being edited\n    \nReturns:\n    The edited chapter\
+        \ with improved quality while preserving the original voice"
+  chapter_writer_agent:
+    type: function
+    agents: [writer_agent]
+    params:
+      module: tools.chapter_writer_agent
+      description: "Write a full chapter based on the book plan and chapter specifications.\n\nArgs:\n    book_plan: JSON\
+        \ string containing the complete book plan with chapters\n    chapter_index: Index of the chapter to write (0-based)\n\
+        \    \nReturns:\n    A complete chapter of approximately 1500-2000 words"
+  compile_book:
+    type: function
+    agents: [publisher_agent]
+    params:
+      module: tools.compile_book
+      description: "Compile all written chapters into a complete book with cover and table of contents.\n\nArgs:\n    book_title:\
+        \ The title of the book to compile\n    force: Whether to force compilation even if not all chapters are complete\n\
+        \    \nReturns:\n    The filename of the compiled book if successful, None otherwise"
+  editor_agent:
+    type: function
+    agents: [editor_agent, ai_book_adk]
+    params:
+      module: tools.editor_agent
+      description: "Edit a story for grammar, clarity, and flow while preserving creative style.\n\nArgs:\n    story: The\
+        \ story content to edit\n    \nReturns:\n    The edited story with improved grammar, clarity, and flow"
+  generate_illustration:
+    type: function
+    agents: [illustrator_agent]
+    params:
+      module: illustrator.generate_illustration
+      description: "Generate an illustration based on the provided description\n\nArgs:\n    description: A text description\
+        \ of what to generate\n    prefix: A prefix for the filename (default: 'illustration')\n    book_path: Path to the\
+        \ book folder where illustrations should be saved\n    \nReturns:\n    The file path of the saved illustration"
+  get_all_books_from_mongodb:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.get_all_books_from_mongodb
+      description: |-
+        Retrieve all book metadata from MongoDB.
+
+        Returns:
+            List of all book metadata documents, or None if error
+  get_book_creation_workflow:
+    type: function
+    agents: [house_manager_agent]
+    params:
+      module: tools.get_book_creation_workflow
+      description: |-
+        Provides step-by-step information about the book creation workflow.
+
+        Returns:
+            str: Detailed workflow information
+  get_book_status:
+    type: function
+    agents: [publisher_agent]
+    params:
+      module: tools.get_book_status
+      description: "Get the status of a book or list all available books with their progress.\n\nArgs:\n    book_title: The\
+        \ specific book title to get status for (optional)\n               If None, lists all available books\n    \nReturns:\n\
+        \    None (prints status information to console)"
+  get_house_agents_info:
+    type: function
+    agents: [house_manager_agent]
+    params:
+      module: tools.get_house_agents_info
+      description: |-
+        Provides detailed information about all agents working in Editor House.
+
+        Returns:
+            str: Information about each agent and their capabilities
+  get_house_services:
+    type: function
+    agents: [house_manager_agent]
+    params:
+      module: tools.get_house_services
+      description: |-
+        Provides comprehensive information about all services offered by Editor House.
+
+        Returns:
+            str: Detailed information about Editor House services
+  get_house_status:
+    type: function
+    agents: [house_manager_agent]
+    params:
+      module: tools.get_house_status
+      description: |-
+        Provides current operational status and statistics of Editor House.
+
+        Returns:
+            str: Current status information
+  google_search:
+    type: module
+    agents: [image_description_weiter_agent]
+  headline_agent:
+    type: function
+    agents: [writer_agent]
+    params:
+      module: tools.headline_agent
+      description: "Generate an engaging and creative title for a story.\n\nArgs:\n    topic: The topic or theme for the story\
+        \ title\n    \nReturns:\n    A creative and engaging story title"
+  house_manager_agent:
+    type: agent
+    agents: [ai_book_adk]
+    params:
+      wrapper: AgentTool
+      agent: house_manager_agent
+  illustrator_agent:
+    type: agent
+    agents: [ai_book_adk]
+    params:
+      wrapper: AgentTool
+      agent: illustrator_agent
+      description: Generates an illustration for a chapter based on its content
+  image_description_weiter_agent:
+    type: agent
+    agents: [illustrator_agent]
+    params:
+      wrapper: AgentTool
+      agent: image_description_weiter_agent
+  load_book_metadata_from_mongodb:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.load_book_metadata_from_mongodb
+      description: "Load book metadata from MongoDB database.\n\nArgs:\n    book_title: The title of the book to load metadata\
+        \ for\n    \nReturns:\n    Book metadata dictionary if found, None otherwise"
+  publish_story:
+    type: function
+    agents: [editor_agent]
+    params:
+      module: tools.publish_story
+      description: "Save a story to a file with proper formatting.\n\nArgs:\n    title: The title of the story\n    story:\
+        \ The story content to save\n    output_dir: Directory to save the file (default: current directory)\n    \nReturns:\n\
+        \    The filename where the story was saved"
+  publisher_agent:
+    type: agent
+    agents: [ai_book_adk]
+    params:
+      wrapper: AgentTool
+      agent: publisher_agent
+  store_book_metadata_to_mongodb:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.store_book_metadata_to_mongodb
+      description: "Store or update book metadata in MongoDB database instead of JSON file.\n\nArgs:\n    book_title: The\
+        \ title of the book to store metadata for\n    \nReturns:\n    True if successful, False otherwise"
+  story_pipeline:
+    type: function
+    agents: [writer_agent]
+    params:
+      module: tools.story_pipeline
+      description: "Complete pipeline to create a short story from topic to final output.\n\nArgs:\n    topic: The topic or\
+        \ theme for the story\n    \nReturns:\n    The final edited story ready for publishing"
+  sync_all_books_to_mongodb:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.sync_all_books_to_mongodb
+      description: |-
+        Sync all book metadata from JSON files to MongoDB.
+
+        Returns:
+            Dictionary with book titles as keys and success status as values
+  table_of_contents_generator:
+    type: function
+    agents: [thinker_agent]
+    params:
+      module: tools.table_of_contents_generator
+      description: "Generates a table of contents for the book.\n\nArgs:\n    book_plan: JSON string containing the book plan\
+        \ with chapters\n    \nReturns:\n    A formatted table of contents as a markdown string"
+  thinker_agent:
+    type: agent
+    agents: [ai_book_adk]
+    params:
+      wrapper: AgentTool
+      agent: thinker_agent
+  write_next_chapter:
+    type: function
+    agents: [ai_book_adk]
+    params:
+      module: tools.write_next_chapter
+      description: "Write the next chapter in the book sequence.\n\nArgs:\n    book_title: The title of the book to continue\
+        \ writing\n    \nReturns:\n    The filename of the written chapter if successful, None if book not found or complete"
+  writer_agent:
+    type: agent
+    agents: [ai_book_adk, writer_agent]
+    params:
+      wrapper: AgentTool
+      agent: writer_agent
+      description: "Write a fictional short story based on the provided title.\n\nArgs:\n    title: The title to base the\
+        \ story on\n    \nReturns:\n    A complete fictional short story of 700-1000 words"
+
+teams:
+  ai_book_adk:
+    type: hierarchy
+    agents: [ai_book_adk, editor_agent, house_manager_agent, illustrator_agent, publisher_agent, thinker_agent, writer_agent]
+
+imports:
+  Agent: google.adk.agents.Agent
+  AgentTool: google.adk.tools.agent_tool.AgentTool
+  Any: typing.Any
+  base64: base64
+  book_cover_description_agent: sub_agents.thinker_agent.tools.book_cover_description_agent
+  book_planner_agent: sub_agents.thinker_agent.tools.book_planner_agent
+  BookMetadata: tools.BookMetadata
+  BytesIO: io.BytesIO
+  chapter_editor_agent: sub_agents.editor_agent.tools.chapter_editor_agent
+  chapter_writer_agent: sub_agents.writer_agent.tools.chapter_writer_agent
+  ConnectionFailure: pymongo.errors.ConnectionFailure
+  datetime: datetime
+  Dict: typing.Dict
+  DuplicateKeyError: pymongo.errors.DuplicateKeyError
+  editor_agent: agent.editor_agent
+  FormatAgent: editor.FormatAgent
+  genai: google.genai
+  generate_illustration: illustrator.generate_illustration
+  google_search: google.adk.tools.google_search
+  house_manager_agent: agent.house_manager_agent
+  illustrator: illustrator
+  illustrator_agent: agent.illustrator_agent
+  Image: PIL.Image
+  image_description_weiter_agent: sub_agents.image_description_writer_agent.agent.image_description_weiter_agent
+  json: json
+  List: typing.List
+  LlmAgent: google.adk.agents.LlmAgent
+  load_dotenv: dotenv.load_dotenv
+  logging: logging
+  MongoClient: pymongo.MongoClient
+  Optional: typing.Optional
+  os: os
+  Path: pathlib.Path
+  prompt: prompt
+  publisher_agent: agent.publisher_agent
+  re: re
+  root_agent: agent.root_agent
+  sys: sys
+  table_of_contents_generator: sub_agents.thinker_agent.tools.table_of_contents_generator
+  thinker_agent: agent.thinker_agent
+  time: time
+  ToolContext: google.adk.tools.tool_context.ToolContext
+  tools: tools
+  traceback: traceback
+  types: google.genai.types
+  util: importlib.util
+  writer_agent: agent.writer_agent
+
+functions:
+  __init__:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self, book_dir, book_title]
+  _apply_ai_formatting:
+    type: sync
+    module: others.editor
+    args: [self, content, chapter_title]
+  _apply_rule_based_formatting:
+    type: sync
+    module: others.editor
+    args: [self, content]
+  _create_safe_title:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self, title]
+    params:
+      returns: str
+  _get_mongodb_collection:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+  _remove_undesirable_text:
+    type: sync
+    module: others.editor
+    args: [self, content]
+  answer_house_faq:
+    type: sync
+    module: Ai-book-adk.sub_agents.house_manager_agent.tools
+    args: [question]
+    params:
+      returns: str
+  book_cover_description_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [book_plan]
+    params:
+      returns: str
+  book_pipeline:
+    type: sync
+    module: Ai-book-adk.tools
+    args: [topic, num_chapters]
+    params:
+      returns: str
+  book_planner_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [topic, num_chapters]
+    params:
+      returns: str
+  chapter_editor_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.editor_agent.tools
+    args: [chapter_content, chapter_title]
+    params:
+      returns: str
+  chapter_writer_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.writer_agent.tools
+    args: [book_plan, chapter_index]
+    params:
+      returns: str
+  compile_book:
+    type: sync
+    module: Ai-book-adk.sub_agents.publisher_agent.tools
+    args: [book_title, force]
+    params:
+      returns: Optional[str]
+  editor_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.editor_agent.tools
+    args: [story]
+    params:
+      returns: str
+  enhance_book_formatting:
+    type: sync
+    module: others.editor
+    args: [book_title]
+  enhance_chapter_formatting:
+    type: sync
+    module: others.editor
+    args: [chapter_filepath]
+  format_chapter:
+    type: sync
+    module: others.editor
+    args: [self, chapter_content, chapter_title, chapter_number]
+  generate_illustration:
+    type: sync
+    module: others.illustrator
+    args: [description, prefix, book_path]
+    params:
+      returns: str
+  get_all_books_from_mongodb:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    params:
+      returns: str
+  get_all_metadata:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self]
+  get_book_creation_workflow:
+    type: sync
+    module: Ai-book-adk.sub_agents.house_manager_agent.tools
+    params:
+      returns: str
+  get_book_info:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self]
+  get_book_status:
+    type: sync
+    module: Ai-book-adk.sub_agents.publisher_agent.tools
+    args: [book_title]
+    params:
+      returns: None
+  get_house_agents_info:
+    type: sync
+    module: Ai-book-adk.sub_agents.house_manager_agent.tools
+    params:
+      returns: str
+  get_house_services:
+    type: sync
+    module: Ai-book-adk.sub_agents.house_manager_agent.tools
+    params:
+      returns: str
+  get_house_status:
+    type: sync
+    module: Ai-book-adk.sub_agents.house_manager_agent.tools
+    params:
+      returns: str
+  get_next_chapter_index:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self]
+  headline_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.writer_agent.tools
+    args: [topic]
+    params:
+      returns: str
+  illustrator_agent:
+    type: sync
+    module: others.main
+    args: [chapter_content, chapter_title, book_title, chapter_number]
+    params:
+      returns: str
+  initialize:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self, book_plan, cover_description, toc, topic]
+  load:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self]
+  load_book_metadata_from_mongodb:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [book_title]
+    params:
+      returns: str
+  publish_story:
+    type: sync
+    module: Ai-book-adk.sub_agents.editor_agent.tools
+    args: [title, story, output_dir]
+    params:
+      returns: str
+  regenerate_book_chapters:
+    type: sync
+    module: others.regenerate_chapters
+  store_book_metadata_to_mongodb:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [book_title]
+    params:
+      returns: bool
+  story_pipeline:
+    type: sync
+    module: Ai-book-adk.sub_agents.writer_agent.tools
+    args: [topic]
+    params:
+      returns: str
+  sync_all_books_to_mongodb:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    params:
+      returns: str
+  table_of_contents_generator:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [book_plan]
+    params:
+      returns: str
+  update_chapter:
+    type: sync
+    module: Ai-book-adk.sub_agents.thinker_agent.tools
+    args: [self, chapter_index, filename, content]
+  write_next_chapter:
+    type: sync
+    module: Ai-book-adk.tools
+    args: [book_title]
+    params:
+      returns: Optional[str]
+  writer_agent:
+    type: sync
+    module: Ai-book-adk.sub_agents.writer_agent.tools
+    args: [title]
+    params:
+      returns: str
+
+variables:
+  GOOGLE_API_KEY:
+    type: env
+    params:
+      caller: [os.getenv, genai.Client, os.environ.get]
+      path: [others.editor, Ai-book-adk.sub_agents.editor_agent.tools, others.illustrator, Ai-book-adk.sub_agents.writer_agent.tools,
+        Ai-book-adk.tools, others.main, Ai-book-adk.sub_agents.publisher_agent.tools, Ai-book-adk.sub_agents.thinker_agent.tools]
+  MONGODB_CONNECTION_STRING:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [Ai-book-adk.sub_agents.thinker_agent.tools]
+
+files:
+  ./:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: [chapter_*.md, '*.md']
+      caller: [enhance_book_formatting, regenerate_book_chapters]
+  .md:
+    type: literal
+    actions: [read]
+    params:
+      caller: [compile_book]
+      path: [book_metadata.book_dir]
+  _metadata_export.json:
+    type: literal
+    actions: [read]
+    params:
+      caller: [compile_book]
+      path: [book_metadata.book_dir]
+  book_dir:
+    type: variable
+    actions: [read]
+    params:
+      caller: [book_dir.glob, book_dir.iterdir, Path]
+  book_metadata.json:
+    type: literal
+    actions: [read]
+    params:
+      caller: [get_book_status, __init__, sync_all_books_to_mongodb]
+      path: [item]
+  book_metadata_path:
+    type: literal
+    actions: [read]
+    params:
+      caller: [Path('books/book_book_about_broken_love/book_metadata.json'), open, json.load]
+  books/book_book_about_broken_love:
+    type: literal
+    actions: [read]
+    params:
+      caller: [regenerate_book_chapters]
+  books/book_book_about_broken_love/book_metadata.json:
+    type: literal
+    actions: [read]
+    params:
+      caller: [regenerate_book_chapters]
+  chapter_filepath:
+    type: variable
+    actions: [read]
+    params:
+      caller: [Path]
+  filepath:
+    type: literal
+    actions: [read, write]
+    params:
+      caller: [Path(chapter_filepath), open, image.save]
+  illustrations_dir:
+    type: variable
+    actions: [read]
+    params:
+      caller: [os.path.exists, os.makedirs, illustrations_dir.iterdir]
+  metadata_file:
+    type: variable
+    actions: [read]
+    params:
+      caller: [open, json.load]
+      alias: [f]
+  old_file:
+    type: variable
+    actions: [delete]
+    params:
+      caller: [old_file.unlink]
+  tools.py:
+    type: literal
+    actions: [read]
+    params:
+      caller: [regenerate_book_chapters]
+      path: [Path.parent]
